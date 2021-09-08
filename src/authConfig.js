@@ -7,7 +7,7 @@ const msalConfig = {
     auth: {
         clientId: "97cb2c6c-52f7-4bf2-8084-772462c98e18",
         authority: "https://login.microsoftonline.com/common",
-        redirectUri: "https://lively-cliff-0a7fd291e.azurestaticapps.net/",
+        redirectUri: "https://vesso.kylemar.dev/",
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
