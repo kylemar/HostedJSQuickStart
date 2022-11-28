@@ -19,7 +19,8 @@ function selectAccount() {
         console.warn("Multiple accounts detected.");
     } else if (currentAccounts.length === 1) {
         username = currentAccounts[0].username;
-        showWelcomeMessage(username);
+        setSignedIn();
+        updateIdTokenTab(currentAccounts[0].idTokenClaims, null);
     }
 }
 
@@ -32,7 +33,9 @@ function handleResponse(response) {
 
     if (response !== null) {
         username = response.account.username;
-        showWelcomeMessage(username);
+        setSignedIn();
+        updateIdTokenTab(response.idTokenClaims, response.idToken);
+        updateTokenResponseTab(response);
     } else {
         selectAccount();
     }
@@ -45,11 +48,11 @@ function signIn() {
      * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/request-response-object.md#request
      */
 
-    myMSALObj.loginPopup(loginRequest)
-        .then(handleResponse)
-        .catch(error => {
-            console.error(error);
-        });
+     myMSALObj.loginPopup(loginRequest)
+     .then(handleResponse)
+     .catch(error => {
+         console.error(error);
+     });
 }
 
 function signOut() {
@@ -61,11 +64,11 @@ function signOut() {
 
     const logoutRequest = {
         account: myMSALObj.getAccountByUsername(username),
-        postLogoutRedirectUri: msalConfig.auth.redirectUri,
-        mainWindowRedirectUri: msalConfig.auth.redirectUri
+        mainWindowRedirectUri: window.location.href
     };
 
     myMSALObj.logoutPopup(logoutRequest);
+    setSignedOut();
 }
 
 function getTokenPopup(request) {
@@ -83,6 +86,7 @@ function getTokenPopup(request) {
                 // fallback to interaction when silent call fails
                 return myMSALObj.acquireTokenPopup(request)
                     .then(tokenResponse => {
+                        updateTokenResponseTab(response);
                         console.log(tokenResponse);
                         return tokenResponse;
                     }).catch(error => {
@@ -94,22 +98,33 @@ function getTokenPopup(request) {
     });
 }
 
-function seeProfile() {
-    getTokenPopup(loginRequest)
-        .then(response => {
-            callMSGraph(graphConfig.graphMeEndpoint, response.accessToken, updateUI);
-        }).catch(error => {
-            console.error(error);
-        });
-}
+function getProfile() {
+    const tokenRequest = {
+        scopes: ["User.Read"],
+        forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
+    };
 
-function readMail() {
     getTokenPopup(tokenRequest)
         .then(response => {
-            callMSGraph(graphConfig.graphMailEndpoint, response.accessToken, updateUI);
+            callMSGraph("https://graph.microsoft.com/v1.0/me", response.accessToken, updateResultsTab);
+        }).catch(error => {
+            console.error(error);
+        });
+}
+ 
+function getPeople() {
+    const tokenRequest = {
+        scopes: ["People.Read"],
+        forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
+    };
+
+    getTokenPopup(tokenRequest)
+        .then(response => {
+            callMSGraph("https://graph.microsoft.com/v1.0/me/people", response.accessToken, updatePeopleResultsTab);
         }).catch(error => {
             console.error(error);
         });
 }
 
+setAuthorityText();
 selectAccount();

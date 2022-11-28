@@ -8,7 +8,7 @@ const msalConfig = {
         clientId: "97cb2c6c-52f7-4bf2-8084-772462c98e18",
         authority: "https://login.microsoftonline.com/common",
         //redirectUri: "https://vesso.kylemar.dev/",
-        //redirectUri: "http://localhost:5500/src/index.html",
+        //redirectUri: "http://localhost:5500",
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
@@ -49,11 +49,3 @@ const loginRequest = {
     scopes: ["User.Read"]
 };
 
-/**
- * Add here the scopes to request when obtaining an access token for MS Graph API. For more information, see:
- * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/resources-and-scopes.md
- */
-const tokenRequest = {
-    scopes: ["User.Read", "Mail.Read"],
-    forceRefresh: false // Set this to "true" to skip a cached token and go to the server to get a new token
-};

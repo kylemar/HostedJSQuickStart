@@ -1,68 +1,182 @@
 // Select DOM elements to work with
-const welcomeDiv = document.getElementById("WelcomeMessage");
-const signInButton = document.getElementById("SignIn");
-const cardDiv = document.getElementById("card-div");
-const mailButton = document.getElementById("readMail");
-const profileButton = document.getElementById("seeProfile");
-const profileDiv = document.getElementById("profile-div");
+const signInButton = document.getElementById("btnSignIn");
+const profileButton = document.getElementById("btnProfile");
+const peopleButton = document.getElementById("btnPeople");
+const groupsButton = document.getElementById("btnGroups");
+const signOutButton = document.getElementById("btnSignOut");
+const idTokenButton = document.getElementById("btnIDToken");
+const tokenResponseButton = document.getElementById("btnTokenResponse");
+const resultsButton = document.getElementById("btnResults");
+const logButton = document.getElementById("btnLog");
+const tabsDiv = document.getElementById("Tabs");
+const idTokenTab = document.getElementById("idTokenTab");
+const tokenResponseTab = document.getElementById("tokenResponseTab");
+const resultsTab = document.getElementById("resultsTab");
+const logTab = document.getElementById("logTab");
 
-function showWelcomeMessage(username) {
-    // Reconfiguring DOM elements
-    cardDiv.style.display = 'initial';
-    welcomeDiv.innerHTML = `Welcome<br/>${username}`;
-    signInButton.setAttribute("onclick", "signOut();");
-    signInButton.setAttribute('class', "btn btn-success")
-    signInButton.innerHTML = "Sign Out";
+function setSignedIn() {
+    signInButton.setAttribute("onclick", "");
+    signInButton.setAttribute('class', "btn btn-secondary");
+
+    profileButton.setAttribute("onclick", "getProfile()");
+    profileButton.setAttribute('class', "btn btn-primary");
+
+    peopleButton.setAttribute("onclick", "getPeople()");
+    peopleButton.setAttribute('class', "btn btn-primary");
+
+    groupsButton.setAttribute("onclick", "");
+    groupsButton.setAttribute('class', "btn btn-primary");
+
+    signOutButton.setAttribute("onclick", "signOut()");
+    signOutButton.setAttribute('class', "btn btn-primary");
+
+    idTokenButton.setAttribute("onclick", "switchTab('idTokenTab');");
+    idTokenButton.setAttribute('class', "btn btn-primary");
+
+    tokenResponseButton.setAttribute("onclick", "switchTab('tokenResponseTab');");
+    tokenResponseButton.setAttribute('class', "btn btn-primary");
+
+    resultsButton.setAttribute("onclick", "switchTab('resultsTab');");
+    resultsButton.setAttribute('class', "btn btn-primary");
+
+    logButton.setAttribute("onclick", "switchTab('logTab');");
+    logButton.setAttribute('class', "btn btn-primary");
+   
 }
 
-function updateUI(data, endpoint) {
-    console.log('Graph API responded at: ' + new Date().toString());
+function setSignedOut() {
+    signInButton.setAttribute("onclick", "signIn()");
+    signInButton.setAttribute('class', "btn btn-primary");
 
-    if (endpoint === graphConfig.graphMeEndpoint) {
-        profileDiv.innerHTML = ''
-        const title = document.createElement('p');
-        title.innerHTML = "<strong>Title: </strong>" + data.jobTitle;
-        const email = document.createElement('p');
-        email.innerHTML = "<strong>Mail: </strong>" + data.mail;
-        const phone = document.createElement('p');
-        phone.innerHTML = "<strong>Phone: </strong>" + data.businessPhones[0];
-        const address = document.createElement('p');
-        address.innerHTML = "<strong>Location: </strong>" + data.officeLocation;
-        profileDiv.appendChild(title);
-        profileDiv.appendChild(email);
-        profileDiv.appendChild(phone);
-        profileDiv.appendChild(address);
+    profileButton.setAttribute("onclick", "");
+    profileButton.setAttribute('class', "btn btn-secondary");
 
-    } else if (endpoint === graphConfig.graphMailEndpoint) {
-        if (data.value.length < 1) {
-            alert("Your mailbox is empty!")
-        } else {
-            const tabContent = document.getElementById("nav-tabContent");
-            const tabList = document.getElementById("list-tab");
-            tabList.innerHTML = ''; // clear tabList at each readMail call
+    peopleButton.setAttribute("onclick", "");
+    peopleButton.setAttribute('class', "btn btn-secondary");
 
-            data.value.map((d, i) => {
-                // Keeping it simple
-                if (i < 10) {
-                    const listItem = document.createElement("a");
-                    listItem.setAttribute("class", "list-group-item list-group-item-action")
-                    listItem.setAttribute("id", "list" + i + "list")
-                    listItem.setAttribute("data-toggle", "list")
-                    listItem.setAttribute("href", "#list" + i)
-                    listItem.setAttribute("role", "tab")
-                    listItem.setAttribute("aria-controls", i)
-                    listItem.innerHTML = d.subject;
-                    tabList.appendChild(listItem)
+    groupsButton.setAttribute("onclick", "");
+    groupsButton.setAttribute('class', "btn btn-secondary");
 
-                    const contentItem = document.createElement("div");
-                    contentItem.setAttribute("class", "tab-pane fade")
-                    contentItem.setAttribute("id", "list" + i)
-                    contentItem.setAttribute("role", "tabpanel")
-                    contentItem.setAttribute("aria-labelledby", "list" + i + "list")
-                    contentItem.innerHTML = "<strong> from: " + d.from.emailAddress.address + "</strong><br><br>" + d.bodyPreview + "...";
-                    tabContent.appendChild(contentItem);
-                }
-            });
+    signOutButton.setAttribute("onclick", "");
+    signOutButton.setAttribute('class', "btn btn-secondary");
+
+    idTokenButton.setAttribute("onclick", "");
+    idTokenButton.setAttribute('class', "btn btn-secondary");
+
+    tokenResponseButton.setAttribute("onclick", "");
+    tokenResponseButton.setAttribute('class', "btn btn-secondary");
+
+    resultsButton.setAttribute("onclick", "");
+    resultsButton.setAttribute('class', "btn btn-secondary");
+
+    logButton.setAttribute("onclick", "");
+    logButton.setAttribute('class', "btn btn-secondary");
+   
+}
+
+function setAuthorityText() {
+    const accountTypes = document.getElementById("accountTypes");
+    const authorityText = document.getElementById("authorityText");
+
+    if (accountTypes.selectedIndex === 0) {
+        authorityText.innerHTML = "https://login.microsoftonline.com/common";
+    }
+    else if (accountTypes.selectedIndex === 1) {
+        authorityText.innerHTML = "https://login.microsoftonline.com/organizations";
+    }
+    else if (accountTypes.selectedIndex === 2) {
+        authorityText.innerHTML = "https://login.microsoftonline.com/consumers";
+    }    
+    else if (accountTypes.selectedIndex === 3) {
+        authorityText.innerHTML = "https://login.microsoftonline.com/idfordevs.dev";
+    }
+    else {
+        authorityText.innerHTML = accountTypes.selectedIndex;
+    }
+}
+
+function updateIdTokenTab(claims, idToken) {
+
+    idTokenTab.innerHTML = ''; 
+
+    for (const key in claims) {
+        var p = document.createElement('p');
+        p.innerHTML = "<strong>" + key + ": </strong>" + claims[key];
+        idTokenTab.appendChild(p);
+    }
+
+    if (idToken) {
+        const jwtmsLink = "https://jwt.ms#id_token=" + idToken;
+        const token = document.createElement('p');
+        token.innerHTML = "<strong>ID Token: </strong>" + "<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://jwt.ms#id_token=" + idToken + "\">idToken</a>" ;
+        idTokenTab.appendChild(token);
+    }  
+    else {
+        const fromCache = document.createElement('p');
+        fromCache.innerHTML = "<strong>User auth from cache - MSAL had a valid ID token so \"fresh\" authentication not needed.</strong>";
+        idTokenTab.appendChild(fromCache);
+    }
+}
+
+function updateTokenResponseTab(response) {
+    tokenResponseTab.innerHTML = ''; 
+
+    for (const key in response) {
+        if ( key == "account") {
+            var p = document.createElement('p');
+            p.innerHTML = "<strong>" + key + ": </strong>";
+            tokenResponseTab.appendChild(p);
+            const account = response.account;
+            for (const akey in account ) {
+                var p2 = document.createElement('p');
+                p2.innerHTML = "<strong>" + akey + ": </strong>" + account[akey];
+                p2.style.marginLeft = "25px";
+                tokenResponseTab.appendChild(p2);
+            }
+        }
+        else {
+            var p = document.createElement('p');
+            p.innerHTML = "<strong>" + key + ": </strong>" + response[key];    
+            tokenResponseTab.appendChild(p);
+        }
+    }
+}
+
+function updateResultsTab(data) {
+    resultsTab.innerHTML = ''; 
+
+    for (const key in data) {
+        var p = document.createElement('p');
+        p.innerHTML = "<strong>" + key + ": </strong>" + data[key];
+        resultsTab.appendChild(p);
+    }
+}
+
+
+function updatePeopleResultsTab(data) {
+    resultsTab.innerHTML = ''; 
+
+    for (const key in data.value) {
+        const person = data.value[key];
+        for (const pkey in person ) {
+            var p = document.createElement('p');
+            p.innerHTML = "<strong>" + pkey + ": </strong>" + person[pkey];
+            resultsTab.appendChild(p);
+        }
+    }
+}
+
+function switchTab(tabID) {
+    var switchToTab = document.getElementById(tabID);
+    for (var i = 0; i < tabsDiv.childNodes.length; i++) {
+        var node = tabsDiv.childNodes[i];
+        if (node.nodeType == 1) { 
+            if (node == switchToTab){
+                node.style.display = 'block';
+            }
+            else {
+                node.style.display = 'none';
+            }
         }
     }
 }

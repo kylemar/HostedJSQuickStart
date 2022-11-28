@@ -17,6 +17,6 @@ function callMSGraph(endpoint, token, callback) {
 
     fetch(endpoint, options)
         .then(response => response.json())
-        .then(response => callback(response, endpoint))
+        .then(response => callback(response))
         .catch(error => console.log(error));
 }
