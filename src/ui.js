@@ -13,6 +13,8 @@ const idTokenTab = document.getElementById("idTokenTab");
 const tokenResponseTab = document.getElementById("tokenResponseTab");
 const resultsTab = document.getElementById("resultsTab");
 const logTab = document.getElementById("logTab");
+const accountTypes = document.getElementById("accountTypes");
+const authorityText = document.getElementById("authorityText");
 
 function setSignedIn() {
     signInButton.setAttribute("onclick", "");
@@ -75,10 +77,7 @@ function setSignedOut() {
 }
 
 function setAuthorityText() {
-    const accountTypes = document.getElementById("accountTypes");
-    const authorityText = document.getElementById("authorityText");
-
-    if (accountTypes.selectedIndex === 0) {
+        if (accountTypes.selectedIndex === 0) {
         authorityText.innerHTML = "https://login.microsoftonline.com/common";
     }
     else if (accountTypes.selectedIndex === 1) {
